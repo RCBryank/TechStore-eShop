@@ -1,0 +1,11 @@
+body.LandingPage{
+    background: #A41312;
+    background: linear-gradient(90deg,rgba(164, 19, 18, 1) 52%, rgba(254, 241, 213, 1) 51%);
+}
+
+@media(min-width:640px){
+    body.LandingPage{
+         background: #A41312;
+    background: linear-gradient(90deg,rgba(164, 19, 18, 1) 42%, rgba(254, 241, 213, 1) 41%);
+    }
+}
