@@ -17,7 +17,7 @@ class ProductMediaController extends Controller
             $productmedia = ProductMedia::create([
                 'FileName' => $file->getClientOriginalName(),
                 'HomePath' => 'storage/' . $path,
-                'PublicPath' => 'storage/' . $path,
+                'PublicPath' => '/storage/' . $path,
                 'FileSizeKB' => $file->getSize() / 1024,
                 'ID_Product' => $idProduct,
                 'MediaExtension' => $file->getClientOriginalExtension()

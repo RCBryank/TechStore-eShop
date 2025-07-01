@@ -103,17 +103,25 @@ class WebUserProfileController extends Controller
     {
         $idwebuser = Auth::user()->ID;
 
-        $productsincart = ProductinCart::select("productincart.ID as ID_ProductinCart", "product.ID as ID_Product", "productincart.Quantity", "Price")
+        $productsincart = ProductinCart::select("productincart.ID as ID_ProductinCart", "product.ID as ID_Product", "productincart.Quantity", "Price", "Discount")
             ->join("product", "product.ID", "=", "productincart.ID_Product")
+            ->leftjoin("discount", "discount.ID_Product", "productincart.ID_Product")
             ->where("ID_WebUser", "=", $idwebuser)
             ->get()->toArray();
 
         $prodincartcontroller = new ProductinCartController();
         $productpurchasecontroller = new ProductPurchaseDetailController();
         foreach ($productsincart as $prodincart) {
+
+            $realprice = $prodincart["Price"];
+            if ($prodincart["Discount"] != null && $prodincart["Discount"] > 0) {
+                $amountdiscount = $realprice * ($prodincart["Discount"] * .01);
+                $realprice -= $amountdiscount;
+            }
+
             $data = [
                 "Quantity" => $prodincart["Quantity"],
-                "PriceUnitProduct" => $prodincart["Price"]
+                "PriceUnitProduct" => $realprice
             ];
             $productpurchasecontroller->store($data, $prodincart["ID_Product"], $idwebuser);
 

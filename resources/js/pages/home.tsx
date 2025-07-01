@@ -6,7 +6,7 @@ import MainSlideShow from '@/components/sections/mainslideshow';
 import MainCategories from '@/components/sections/maincategories';
 import MainCategoryShortBand from '@/components/sections/maincategoriesshortband';
 import HomePromises from '@/components/sections/home-promises';
-import HomeMostSold from '@/components/sections/home-mostsold';
+import HomeOnSale from '@/components/sections/home-productonsale';
 
 const Home = () => {
 
@@ -18,7 +18,7 @@ const Home = () => {
             <MainCategoryShortBand idCategory={2} classNames={"bg-gradient-to-r from-red-500 to-orange-500"} />
 
             <HomePromises />
-            <HomeMostSold />
+            <HomeOnSale />
         </>
     )
 }

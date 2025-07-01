@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductCommentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductinCartController;
 use App\Http\Controllers\ProductRatingController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\WebUserController;
 use App\Http\Controllers\WebUserProfileController;
 use App\Http\Middleware\SysAdmin;
@@ -89,15 +90,19 @@ Route::get('/busqueda', [ProductController::class, "searchresults"])->name('sear
 Route::get('/product/{id}/comments/{orderBy}/{page}', [ProductCommentController::class, "getproductcomments"])->whereNumber('id')->whereAlpha("orderBy")->whereNumber("page");
 
 Route::get('/search', [ProductController::class, "searchquery"])->name('search-query');
+Route::get('/search-brand-related', [BrandController::class, "searchquerybrands"])->name('searchbrand-query');
+Route::get('/search-tag-related', [TagController::class, "searchquerytag"])->name('searchtag-query');
 
 Route::get('/canrate/{id}', [WebUserProfileController::class, "canrate"])->whereNumber("id");
 Route::get('/cancomment', [WebUserProfileController::class, "cancomment"]);
 
 Route::get('/popular-by-category/{id}', [ProductController::class, "getpopularproductsbycategory"])->whereNumber('id');
 Route::get('/related-brand-products/{id}', [ProductController::class, "getrelatedbrandproducts"])->whereNumber('id');
+Route::get('/products-discount', [ProductController::class, "getdiscountproducts"]);
 Route::get('/producto-categorias', [ProductCategoryController::class, "all"]);
 Route::get('/producto-categorias/{id}', [ProductCategoryController::class, "find"])->whereNumber('id');
 Route::get('/marca', [BrandController::class, "all"]);
+Route::get('/tag', [TagController::class, "all"]);
 
 
 require __DIR__ . '/settings.php';

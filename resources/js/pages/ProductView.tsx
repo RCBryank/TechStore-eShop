@@ -12,6 +12,8 @@ import ProductViewAuthComment from '@/components/sections/productview-authcommen
 import ProductViewComments from '@/components/sections/productview-comments';
 import ProductViewAuthRating from '@/components/sections/productview-authrating';
 import StarRating from '@/components/star-rating';
+import { CalculatePrice } from '@/hooks/use-calculateprice';
+import { CalculateAmountDiscount } from '@/hooks/use-calculateamountdiscount';
 
 const ProductView = (shareddata: any) => {
     type ProductRating = {
@@ -47,6 +49,7 @@ const ProductView = (shareddata: any) => {
         Name: '',
         Description: '',
         Price: 0,
+        Discount: 0,
         Stock: 0,
         ID_Brand: 1,
         Brand_Name: '',
@@ -68,7 +71,7 @@ const ProductView = (shareddata: any) => {
     }
 
     const { data, setData, post, processing, errors, reset } = useForm<Required<AddtoCartForm>>({
-        Quantity: 0,
+        Quantity: 1,
         ID_Product: shareddata.ID_Product
     });
 
@@ -118,7 +121,7 @@ const ProductView = (shareddata: any) => {
                         <div className='inline-block'>
                             <StarRating filled={RateProduct.AvgRating} clickhandler={() => { return }} />
                         </div>
-                        <p className='inline-block text-sm'> de {RateProduct.TotalRates} opinion(es)</p>
+                        <p className='inline-block text-sm ml-2'> de {RateProduct.TotalRates} opinion(es)</p>
                     </div>
                     <p className='align-bottom text-3xl mt-auto'>{Product.Name}</p>
                     <p className='inline-block text-blue-500 font-bold'>{Product.Stock} disponibles</p>
@@ -126,10 +129,13 @@ const ProductView = (shareddata: any) => {
 
                 <div className='flex grow-0 gap-12 mb-20'>
                     <div className='flex-5/12'>
-                        <p className='text-4xl mb-7'>{ConverttoCurrency(Product.Price)}</p>
+                        <p className={(Product.Discount > 0 ? 'line-through' : 'text-4xl mb-7')}>{ConverttoCurrency(Product.Price)}</p>
+                        <p className='text-4xl' hidden={Product.Discount == 0 || Product.Discount == null}>{ConverttoCurrency(CalculatePrice(Product.Price, Product.Discount))} </p>
+                        <p className='mb-7' hidden={Product.Discount == 0 || Product.Discount == null}>Ahorra {ConverttoCurrency(CalculateAmountDiscount(Product.Price, Product.Discount))}</p>
+
                         <div className='mb-7'>
                             <form onSubmit={submit}>
-                                <input type='number' required defaultValue={1} step="1" min="1" max={Product.Stock} onChange={(e) => setData("Quantity", e.target.value)} className="mt-1 mr-5 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 inline w-auto rounded-md sm:text-sm focus:ring-1" />
+                                <input type='number' required defaultValue={data.Quantity} step="1" min="1" max={Product.Stock} onChange={(e) => setData("Quantity", e.target.value)} className="mt-1 mr-5 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 inline w-auto rounded-md sm:text-sm focus:ring-1" />
                                 <button className='cursor-pointer inline-block py-2 px-4 rounded-full bg-brand-red-lighter text-brand-white hover:bg-brand-darkred'>Agregar al carrito</button>
                             </form>
                         </div>
@@ -140,7 +146,7 @@ const ProductView = (shareddata: any) => {
                     <div className='flex-6/12 relative'>
                         <div className='inline-block h-full absolute top-0 w-2/12'>
                             <div id='div_containerimgsprev' className='flex flex-col grow-0 px-6'>
-                                {Product.Media.map((e) => {
+                                {Product.Media.map((e: { ID: number, PublicPath: string }) => {
                                     return <>
                                         <div key={e.ID} className='max-h-16 w-full h-full aspect-square bg-white overflow-hidden cursor-pointer' onClick={(e) => { ImgMiniature_OnClickHandler(e.currentTarget) }}>
                                             <img src={e.PublicPath} className='w-full h-full object-scale-down' />

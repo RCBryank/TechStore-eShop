@@ -71,7 +71,17 @@
 - Funcion para validacion de rating solo si el usuario ha comprado el producto
 - Arreglar Bug de Imagen de Previsualizacion en Product View
 - Codificacion para reemplazar uri al cambiar parametros de busqueda
--> Funcion busqueda con filtros especificados
+- Funcion busqueda con filtros especificados, filtro de tags
+- Crear tabla de Tags
+- Añadir a la creacion de productos, opcion para tags
+- Agregar tabla para descuento
+- Agregar logica para obtener productos en descuento para mostrarlo en el inicio
+- Agregar en componente BandItem un visual para indicar que el producto tiene descuento e indicar el nuevo precio con dicho descuento
+- Agregar el campo de Discount a los otros request que obtienen la data para el BandItem
+- Agregar visual en la pagina de un producto para indicar que esta en descuento, el porcentaje y lo que ahorras.
+- Modificar logica de algoritmo para encontrar los productos mas comprados de las distintas categorias
+-> Diseño pagina categoria
+
 
 <br/>
 

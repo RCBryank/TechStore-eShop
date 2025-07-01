@@ -1,6 +1,6 @@
 import { BodyWrapper } from "@/components/bodywrapper";
 import WebStoreTopBar from "@/components/webstore-topbar";
-import WebStoreLayout from "@/layouts/webstore-layout";
+import WebStoreLayout from "@/layouts/webstore/webstore-layout";
 import { SharedData } from "@/types";
 import { usePage } from "@inertiajs/react";
 

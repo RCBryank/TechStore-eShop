@@ -1,16 +1,10 @@
 import { Link } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import BandItem from "../ui/band-item";
+import { ProductBandDetails } from "@/hooks/use-productbandddetails";
 
 export default function MainCategoryShortBand({ idCategory = 1, imgsrcBand = '/build/images/Misc/BandImg_Default.png', classNames }: { idCategory: number, imgsrcBand?: string, classNames?: any }) {
 
-    type ProductItem = {
-        ID: string,
-        Name: string,
-        Price: number,
-        ProductPhoto: string,
-        URIProduct: string
-    }
 
     const [BandName, setBandName] = useState('');
     const [ProductsBand, setProductsBand] = useState([]);
@@ -68,10 +62,10 @@ export default function MainCategoryShortBand({ idCategory = 1, imgsrcBand = '/b
                                         <Link href=""><p className="p-3 px-8 ">Ver más</p></Link>
                                     </div>
                                 </div>
-                                <div id={"container-band_" + idCategory} className="h-48  flex gap-6 overflow-hidden">
+                                <div id={"container-band_" + idCategory} className="h-48 p-2 flex gap-6 overflow-hidden">
                                     {/* Item */}
-                                    {ProductsBand.map((product: ProductItem) => {
-                                        return <BandItem key={product.ID} name={product.Name} price={product.Price} uriproduct={product.URIProduct} {...(product.ProductPhoto != null ? { productphoto: product.ProductPhoto } : {})} />;
+                                    {ProductsBand.map((product: ProductBandDetails) => {
+                                        return <BandItem key={product.ID} name={product.Name} price={product.Price} discount={product.Discount} uriproduct={product.URIProduct} {...(product.ProductPhoto != null ? { productphoto: product.ProductPhoto } : {})} />;
                                     })}
                                 </div>
                             </div>
@@ -82,10 +76,3 @@ export default function MainCategoryShortBand({ idCategory = 1, imgsrcBand = '/b
         </>
     )
 }
-
-/**className="bg-gradient-to-r from-green-400 to-blue-500" 
- * 
- * 
- * 
-    
-*/

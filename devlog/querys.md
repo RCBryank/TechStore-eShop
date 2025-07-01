@@ -232,3 +232,41 @@ CREATE TABLE productrating (
     CONSTRAINT ID_Product FOREIGN KEY (ID_Product) REFERENCES product(ID),
     CONSTRAINT ID_WebUser FOREIGN KEY (ID_WebUser) REFERENCES webuser(ID)
 )
+
+### Tag
+    - ID
+    - Name
+
+CREATE TABLE tag (
+ 	ID int PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    Name varchar(64) NOT NULL
+);
+
+
+### Product Tag 
+    - ID
+    - ID_Tag
+    - ID_Product
+
+CREATE TABLE producttag (
+	ID int PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    ID_Tag int NOT NULL,
+    ID_Product int NOT NULL,
+    
+    CONSTRAINT ID_Tag FOREIGN KEY (ID_Tag) REFERENCES tag(ID),
+    CONSTRAINT ID_Product FOREIGN KEY (ID_Product) REFERENCES product(ID)
+)
+
+
+### Discount
+    - ID
+    - ID_Product
+    - Discount Percent
+
+CREATE TABLE discount (
+ 	ID int PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    ID_Product int NOT NULL,
+    Discount int DEFAULT 0 NOT NULL,
+    
+    CONSTRAINT ID_Product FOREIGN KEY(ID_Product) REFERENCES product(ID)
+)

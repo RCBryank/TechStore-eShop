@@ -10,6 +10,8 @@ export default function ProductCreate() {
         Stock: any,
         ID_Brand: any,
         ID_ProductCategory: any,
+        Tags: string[],
+        Discount: number,
         ProductFiles: any
     }
 
@@ -20,6 +22,8 @@ export default function ProductCreate() {
         Stock: 0,
         ID_Brand: 1,
         ID_ProductCategory: 1,
+        Tags: [],
+        Discount: 0,
         ProductFiles: null
     });
 
@@ -48,6 +52,7 @@ export default function ProductCreate() {
     }, []);
 
     var [SelectOptions, setSelectOptions] = useState([]);
+    var [SelectTagOptions, setSelectTagOptions] = useState([]);
 
     type OptionType = {
         ID: number,
@@ -64,6 +69,12 @@ export default function ProductCreate() {
             .then((data) => {
                 setSelectOptionsMarca(data);
             })
+
+        fetch('/tag')
+            .then(res => res.json())
+            .then((data) => {
+                setSelectTagOptions(data);
+            })
     }, []);
 
     var [SelectOptionsMarca, setSelectOptionsMarca] = useState([]);
@@ -71,6 +82,16 @@ export default function ProductCreate() {
     const listoptionsMarca = SelectOptionsMarca.map((option: OptionType) => {
         return <option key={option.ID} value={option.ID}>{option.Name}</option>
     });
+
+    function OnSelectTagValueChangedHandler(selectedoptions: HTMLCollection) {
+        //console.log(selectedoptions);
+        let selectedvalues = [];
+        for (let i = 0; i < selectedoptions.length; i++) {
+            const _option = selectedoptions[i] as HTMLOptionElement;
+            selectedvalues.push(_option.value);
+        }
+        setData("Tags", selectedvalues);
+    }
 
     return (
         <>
@@ -104,7 +125,7 @@ export default function ProductCreate() {
                                     </label>
                                 </div>
                             </div>
-                            <div className='flex'>
+                            <div className='flex mb-6'>
                                 <div className='w-6/12'>
                                     <select value={data.ID_ProductCategory} onChange={(e) => setData('ID_ProductCategory', e.target.value)} className='bg-white px-3 py-2 rounded-md'>
                                         {listoptions}
@@ -115,6 +136,22 @@ export default function ProductCreate() {
                                         {listoptionsMarca}
                                     </select>
                                 </div>
+                            </div>
+                            <div>
+                                <p>Tags</p>
+                                <select onChange={(e) => { OnSelectTagValueChangedHandler(e.currentTarget.selectedOptions) }} multiple className='bg-brand-white p-6 py-3 rounded-2xl overflow-auto'>
+                                    {SelectTagOptions.map((item: OptionType) => {
+                                        return (
+                                            <option key={item.ID} value={item.ID}>{item.Name}</option>
+                                        )
+                                    })}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block my-5">
+                                    Descuento
+                                    <input type='number' step="1" min="0" max="100" value={data.Discount} onChange={(e) => setData('Discount', Number(e.target.value))} className="mt-1 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-1/8 rounded-md sm:text-sm focus:ring-1" placeholder='Stock' />
+                                </label>
                             </div>
                             <div>
                                 <br />
@@ -128,8 +165,8 @@ export default function ProductCreate() {
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
         </>
     )
 }

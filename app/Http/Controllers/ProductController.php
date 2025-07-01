@@ -23,8 +23,9 @@ class ProductController extends Controller
 
     public function product($id)
     {
-        $product = Product::select("product.ID", "product.Name", "product.Description", "Price", "Stock", "ID_Brand", "brand.Name as Brand_Name", "productcategory.Name as ProductCategory_Name", "ID_ProductCategory")
+        $product = Product::select("product.ID", "product.Name", "product.Description", "Price", "Discount", "Stock", "ID_Brand", "brand.Name as Brand_Name", "productcategory.Name as ProductCategory_Name", "ID_ProductCategory")
             ->join('brand', 'brand.ID', '=', 'product.ID_Brand')
+            ->leftjoin('discount', 'discount.ID_Product', 'product.ID')
             ->join('productcategory', 'productcategory.ID', '=', 'product.ID_ProductCategory')
             ->join('productstock', 'productstock.ID_Product', '=', 'product.ID')
             ->find($id);
@@ -37,6 +38,7 @@ class ProductController extends Controller
             "Name" => $product["Name"],
             "Description" => $product["Description"],
             "Price" => $product["Price"],
+            "Discount" => $product["Discount"],
             "Stock" => $product["Stock"],
             "ID_Brand" => $product["ID_Brand"],
             "Brand_Name" => $product["Brand_Name"],
@@ -70,6 +72,17 @@ class ProductController extends Controller
         $productstock = new ProductStockController();
         $productstock->store(array("Stock" => $request["Stock"]), $product->ID);
 
+        $producttags = new ProductTagController();
+
+        if (!empty($request["Tags"])) {
+            foreach ($request["Tags"] as $tag) {
+                $producttags->store(array("ID_Tag" => $tag), $product->ID);
+            }
+        }
+
+        $discountcontroller = new DiscountController();
+        $discountcontroller->store(array("Discount" => $request["Discount"]), $product->ID);
+
         //return Inertia::render('ProductCreate', ["Success" => true]);
     }
 
@@ -95,32 +108,81 @@ class ProductController extends Controller
             "Query" => $request["q"],
             "MinPrice" => $request["minprice"],
             "MaxPrice" => $request["maxprice"],
+            "MinRating" => $request["minrating"],
+            "BrandID" => $request["brand"],
+            "Tags" => $request["tags"],
+            "Page" => $request["currentpage"],
+            "Order" => $request["order"]
         ];
 
         $nameproduct = $request["q"];
 
-        $query = Product::select("product.ID", "product.Name", "brand.Name as Brand_Name", "Price", DB::raw("CONCAT('producto/', URI) as URIProduct"), "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
+        $query = Product::select("product.ID", "product.Name", "brand.Name as Brand_Name", "Price", DB::raw("CONCAT('producto/', URI) as URIProduct"), DB::raw("AVG(Rating) as AvgRating"), "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
             ->join("brand", "brand.ID", "=", "product.ID_Brand")
             ->join("productmedia", "productmedia.ID_Product", "product.ID")
+            ->leftjoin("productrating", "productrating.ID_Product", "product.ID")
             ->where("product.Name", "like", "%$nameproduct%")
-            ->groupBy("product.ID")
-            ->orderBy("productmedia.ID", "ASC");
+            ->groupBy("product.ID");
 
         if ($data["MaxPrice"] > 0 && $data["MinPrice"] > 0)
             $query->where("product.Price", ">=", $data["MinPrice"])->where("product.Price", "<=", $data["MaxPrice"]);
 
-        $results = $query->get();
+        if ($data["BrandID"] > 0)
+            $query->where("brand.ID", "=", $data["BrandID"]);
+
+        if ($data["MinRating"] > 0)
+            $query->having("AvgRating", ">=", $data['MinRating']);
+
+        if (!empty($data["Tags"])) {
+            $i = 0;
+            foreach ($data["Tags"] as $tag) {
+                $query->addSelect(DB::raw("MAX(producttag_$i.ID_Product) as Tag_$i, tag_$i.Name as 'NameTag[$i]'"));
+                $query->leftjoin("producttag as producttag_$i", function ($join) use ($i, $tag) {
+                    $join->on("producttag_$i.ID_Product", '=', 'product.ID')
+                        ->where("producttag_$i.ID_Tag", '=', $tag);
+                });
+
+                $query->join("tag as tag_$i", "tag_$i.ID", "producttag_$i.ID_Tag");
+
+                $query->having("Tag_$i", ">", "0");
+
+                $i = $i + 1;
+            }
+        }
+
+        switch ($data["Order"]) {
+            default:
+            case "0":
+                $query->orderBy("product.Price", "ASC");
+                break;
+            case "1":
+                $query->orderBy("product.Price", "DESC");
+                break;
+            case "2":
+                $query->orderBy("product.Name", "ASC");
+                break;
+        }
+
+        $query->orderBy("productmedia.ID", "ASC");
+
+        $results = $query->paginate(ProductController::CONST_SearchResultsperPage, ['*'], 'page', $data["Page"]);
+
+        foreach ($results->items() as $item) {
+            $tags = $item->producttags->toArray();
+        };
 
         return json_encode($results);
     }
 
     public function getrelatedbrandproducts($idbrand): string
     {
-        $products = Product::select("product.ID", "product.Name", "product.Price", DB::raw("CONCAT('/producto/', URI) as URIProduct"), "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
+        $products = Product::select("product.ID", "product.Name", "product.Price", "Discount", DB::raw("CONCAT('/producto/', URI) as URIProduct"), "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
             ->join("productmedia", "productmedia.ID_Product", "product.ID")
             ->Join("brand", "brand.ID", "product.ID_Brand")
+            ->leftjoin("discount", "discount.ID_Product", "product.ID")
             ->where("product.ID_Brand", $idbrand)
             ->groupBy("product.ID")
+            ->orderBy("Discount", "DESC")
             ->orderBy("productmedia.ID", "ASC")
             ->limit(3)
             ->get();
@@ -130,11 +192,29 @@ class ProductController extends Controller
 
     public function getpopularproductsbycategory($category = 1, $count = 3): string
     {
-        $products = Product::select("product.ID", "product.Name", "product.Price", DB::raw("CONCAT('producto/', URI) as URIProduct"), "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
+        $products = Product::select("product.ID", "product.Name", "product.Price", "Discount", DB::raw("CONCAT('producto/', URI) as URIProduct"), DB::raw("COUNT(DISTINCT(productpurchasedetail.ID)) as Count_Purchases"), "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
             ->join("productmedia", "productmedia.ID_Product", "product.ID")
+            ->leftjoin("discount", "discount.ID_Product", "product.ID")
+            ->leftjoin("productpurchasedetail", "productpurchasedetail.ID_Product", "product.ID")
             ->where("product.ID_ProductCategory", $category)
             ->groupBy("product.ID")
+            ->orderBy("Count_Purchases", "DESC")
             ->orderBy("productmedia.ID", "ASC")
+            ->get();
+
+        return json_encode($products);
+    }
+
+    public function getdiscountproducts()
+    {
+        $products = Product::select("product.ID", "product.Name", "product.Price", "Discount", DB::raw("CONCAT('/producto/', URI) as URIProduct"), "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
+            ->join("productmedia", "productmedia.ID_Product", "product.ID")
+            ->join("brand", "brand.ID", "product.ID_Brand")
+            ->join("discount", "discount.ID_Product", "product.ID")
+            ->groupBy("product.ID")
+            ->orderBy("Discount", "DESC")
+            ->orderBy("productmedia.ID", "ASC")
+            ->limit(8)
             ->get();
 
         return json_encode($products);
@@ -159,6 +239,7 @@ class ProductController extends Controller
         return $code;
     }
 
+    const CONST_SearchResultsperPage = 10;
     const CONST_LengthRandomCode = 6;
     const CONST_URIAllowedCharacters = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
 }
