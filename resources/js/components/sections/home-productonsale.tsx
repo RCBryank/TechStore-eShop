@@ -20,7 +20,7 @@ export default function HomeProductsonSale() {
                     <div className="flex gap-5 pb-24">
                         <img src="build/images/Logo.png" className="inline-block w-32" />
                         <h3 className="inline-block font-centuryghotic text-4xl self-end"> Ofertas </h3>
-                        <Link href="" className="inline-block ml-auto self-end"><p className="p-4 px-6 rounded-2xl ml-auto bg-brand-red-lighter text-brand-white hover:bg-brand-darkred">Ver más</p></Link>
+                        <Link href="/ofertas" className="inline-block ml-auto self-end"><p className="p-4 px-6 rounded-2xl ml-auto bg-brand-red-lighter text-brand-white hover:bg-brand-darkred">Ver más</p></Link>
                     </div>
                     <div className="grid grid-cols-3 grow-0 gap-6 pb-24">
                         {LisItemsProducts.map((item: ProductBandDetails) => {

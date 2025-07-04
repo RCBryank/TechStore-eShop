@@ -2,6 +2,7 @@ import { Link } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import BandItem from "../ui/band-item";
 import { ProductBandDetails } from "@/hooks/use-productbandddetails";
+import { isElementInViewport } from "@/hooks/use-ElementinViewport";
 
 export default function MainCategoryShortBand({ idCategory = 1, imgsrcBand = '/build/images/Misc/BandImg_Default.png', classNames }: { idCategory: number, imgsrcBand?: string, classNames?: any }) {
 
@@ -33,16 +34,6 @@ export default function MainCategoryShortBand({ idCategory = 1, imgsrcBand = '/b
             }
         }
     });
-
-    function isElementInViewport(element: HTMLElement) {
-        const rect = element.getBoundingClientRect();
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-        );
-    };
 
 
     return (

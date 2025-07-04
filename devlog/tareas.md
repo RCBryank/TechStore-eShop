@@ -80,7 +80,11 @@
 - Agregar el campo de Discount a los otros request que obtienen la data para el BandItem
 - Agregar visual en la pagina de un producto para indicar que esta en descuento, el porcentaje y lo que ahorras.
 - Modificar logica de algoritmo para encontrar los productos mas comprados de las distintas categorias
--> Diseño pagina categoria
+- Diseño pagina categoria
+- Diseño HTML pagina Categoria
+- Logica para ofertas mas compradas
+- Funcion de lazy loading para productos de una categoria
+- Diseño Pagina para creacion / edicion producto
 
 
 <br/>

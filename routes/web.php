@@ -54,6 +54,10 @@ Route::middleware([SysAdmin::class])->group(function () {
         return Inertia::render('ProductCreate');
     });
 
+    Route::get('/producto/edit/{id}', function () {
+        return Inertia::render('ProductEdit', );
+    });
+
     Route::post('/producto/store', [ProductController::class, 'store'])->name('product-store');
 });
 
@@ -87,6 +91,28 @@ Route::get('/product/{id}/avgrating', [ProductRatingController::class, "getprodu
 
 Route::get('/busqueda', [ProductController::class, "searchresults"])->name('search');
 
+Route::get('/ofertas', function () {
+    return Inertia::render('CategoryPage', ["CategoryName" => "Ofertas", "CategoryType" => "discount"]);
+});
+Route::get('/monitores', function () {
+    return Inertia::render('CategoryPage', ["CategoryName" => "Monitores", "CategoryType" => "monitores"]);
+});
+Route::get('/audifonos', function () {
+    return Inertia::render('CategoryPage', ["CategoryName" => "Audifonos", "CategoryType" => "audifonos"]);
+});
+Route::get('/pc', function () {
+    return Inertia::render('CategoryPage', ["CategoryName" => "PC", "CategoryType" => "pc"]);
+});
+Route::get('/teclados', function () {
+    return Inertia::render('CategoryPage', ["CategoryName" => "Teclados", "CategoryType" => "teclados"]);
+});
+Route::get('/mouses', function () {
+    return Inertia::render('CategoryPage', ["CategoryName" => "Mouses", "CategoryType" => "mouses"]);
+});
+Route::get('/gpu', function () {
+    return Inertia::render('CategoryPage', ["CategoryName" => "GPU", "CategoryType" => "gpu"]);
+});
+
 Route::get('/product/{id}/comments/{orderBy}/{page}', [ProductCommentController::class, "getproductcomments"])->whereNumber('id')->whereAlpha("orderBy")->whereNumber("page");
 
 Route::get('/search', [ProductController::class, "searchquery"])->name('search-query');
@@ -104,6 +130,62 @@ Route::get('/producto-categorias/{id}', [ProductCategoryController::class, "find
 Route::get('/marca', [BrandController::class, "all"]);
 Route::get('/tag', [TagController::class, "all"]);
 
+Route::get('/products-popular/discount', [ProductController::class, "getpopulardiscountproducts"]);
+Route::get('/products-lazy/discount', [ProductController::class, "getlazydiscountproducts"]);
+
+Route::get('/products-popular/monitores', function () {
+    $Pro = new ProductController();
+    return $Pro->getpopularcategoryproducts(2);
+});
+Route::get('/products-lazy/monitores', function (Request $request) {
+    $Pro = new ProductController();
+    return $Pro->getlazycategoryproducts($request, 2);
+});
+
+Route::get('/products-popular/audifonos', function () {
+    $Pro = new ProductController();
+    return $Pro->getpopularcategoryproducts(4);
+});
+Route::get('/products-lazy/audifonos', function (Request $request) {
+    $Pro = new ProductController();
+    return $Pro->getlazycategoryproducts($request, 4);
+});
+
+Route::get('/products-popular/pc', function () {
+    $Pro = new ProductController();
+    return $Pro->getpopularcategoryproducts(5);
+});
+Route::get('/products-lazy/pc', function (Request $request) {
+    $Pro = new ProductController();
+    return $Pro->getlazycategoryproducts($request, 5);
+});
+
+Route::get('/products-popular/teclados', function () {
+    $Pro = new ProductController();
+    return $Pro->getpopularcategoryproducts(6);
+});
+Route::get('/products-lazy/teclados', function (Request $request) {
+    $Pro = new ProductController();
+    return $Pro->getlazycategoryproducts($request, 6);
+});
+
+Route::get('/products-popular/mouses', function () {
+    $Pro = new ProductController();
+    return $Pro->getpopularcategoryproducts(3);
+});
+Route::get('/products-lazy/mouses', function (Request $request) {
+    $Pro = new ProductController();
+    return $Pro->getlazycategoryproducts($request, 3);
+});
+
+Route::get('/products-popular/gpu', function () {
+    $Pro = new ProductController();
+    return $Pro->getpopularcategoryproducts(7);
+});
+Route::get('/products-lazy/gpu', function (Request $request) {
+    $Pro = new ProductController();
+    return $Pro->getlazycategoryproducts($request, 7);
+});
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

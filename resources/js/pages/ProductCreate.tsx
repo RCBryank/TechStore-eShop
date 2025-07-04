@@ -102,9 +102,7 @@ export default function ProductCreate() {
                     <div className='my-16 p-8 rounded-2xl bg-gray-300'>
                         <form onSubmit={submit} encType='multipart/form-data'>
                             <div className='w-6/12'>
-                                <label className="block my-5">
-                                    <input value={data.Name} onChange={(e) => setData('Name', e.target.value)} type="text" name='text' className="mt-1 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1" placeholder="Nombre del Producto" />
-                                </label>
+                                
                             </div>
                             <div className='w-12/12'>
                                 <label className="block my-5">

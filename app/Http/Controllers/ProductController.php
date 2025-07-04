@@ -80,8 +80,10 @@ class ProductController extends Controller
             }
         }
 
-        $discountcontroller = new DiscountController();
-        $discountcontroller->store(array("Discount" => $request["Discount"]), $product->ID);
+        if (isset($request["Discount"]) && $request["Discount"] > 0) {
+            $discountcontroller = new DiscountController();
+            $discountcontroller->store(array("Discount" => $request["Discount"]), $product->ID);
+        }
 
         //return Inertia::render('ProductCreate', ["Success" => true]);
     }
@@ -200,6 +202,7 @@ class ProductController extends Controller
             ->groupBy("product.ID")
             ->orderBy("Count_Purchases", "DESC")
             ->orderBy("productmedia.ID", "ASC")
+            ->limit(3)
             ->get();
 
         return json_encode($products);
@@ -216,6 +219,94 @@ class ProductController extends Controller
             ->orderBy("productmedia.ID", "ASC")
             ->limit(8)
             ->get();
+
+        return json_encode($products);
+    }
+
+    public function getpopulardiscountproducts()
+    {
+        $products = Product::select("product.ID", "product.Name", "product.Price", "Discount", DB::raw("CONCAT('/producto/', URI) as URIProduct"), DB::raw("COUNT(DISTINCT(productpurchasedetail.ID)) as Count_Purchases"),  "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
+            ->join("productmedia", "productmedia.ID_Product", "product.ID")
+            ->join("brand", "brand.ID", "product.ID_Brand")
+            ->join("discount", "discount.ID_Product", "product.ID")
+            ->leftjoin("productpurchasedetail", "productpurchasedetail.ID_Product", "product.ID")
+            ->groupBy("product.ID")
+            ->orderBy("Count_Purchases", "DESC")
+            ->orderBy("Discount", "DESC")
+            ->orderBy("productmedia.ID", "ASC")
+            ->limit(7)
+            ->get();
+
+        //dd($products["items"]);
+        foreach ($products as $item) {
+            $tags = $item->producttags->toArray();
+        };
+
+        return json_encode($products);
+    }
+
+    public function getlazydiscountproducts(Request $request)
+    {
+        $data = [
+            "Page" => $request["currentpage"]
+        ];
+
+        $results = Product::select("product.ID", "product.Name", "product.Price", "Discount", DB::raw("CONCAT('/producto/', URI) as URIProduct"), DB::raw("COUNT(DISTINCT(productpurchasedetail.ID)) as Count_Purchases"),  "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
+            ->join("productmedia", "productmedia.ID_Product", "product.ID")
+            ->join("brand", "brand.ID", "product.ID_Brand")
+            ->join("discount", "discount.ID_Product", "product.ID")
+            ->leftjoin("productpurchasedetail", "productpurchasedetail.ID_Product", "product.ID")
+            ->groupBy("product.ID")
+            ->orderBy("Count_Purchases", "DESC")
+            ->orderBy("Discount", "DESC")
+            ->orderBy("productmedia.ID", "ASC");
+
+        $products = $results->paginate(ProductController::CONST_LazyResultsperPage, ['*'], 'page', $data["Page"]);
+
+        return json_encode($products);
+    }
+
+    public function getpopularcategoryproducts($idcategorytype)
+    {
+        $products = Product::select("product.ID", "product.Name", "product.Price", "Discount", DB::raw("CONCAT('/producto/', URI) as URIProduct"), DB::raw("COUNT(DISTINCT(productpurchasedetail.ID)) as Count_Purchases"),  "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
+            ->join("productmedia", "productmedia.ID_Product", "product.ID")
+            ->join("brand", "brand.ID", "product.ID_Brand")
+            ->leftjoin("discount", "discount.ID_Product", "product.ID")
+            ->leftjoin("productpurchasedetail", "productpurchasedetail.ID_Product", "product.ID")
+            ->where("product.ID_ProductCategory", $idcategorytype)
+            ->groupBy("product.ID")
+            ->orderBy("Count_Purchases", "DESC")
+            ->orderBy("Discount", "DESC")
+            ->orderBy("productmedia.ID", "ASC")
+            ->limit(7)
+            ->get();
+
+        //dd($products["items"]);
+        foreach ($products as $item) {
+            $tags = $item->producttags->toArray();
+        };
+
+        return json_encode($products);
+    }
+
+    public function getlazycategoryproducts(Request $request, $idcategorytype)
+    {
+        $data = [
+            "Page" => $request["currentpage"]
+        ];
+
+        $results = Product::select("product.ID", "product.Name", "product.Price", "Discount", DB::raw("CONCAT('/producto/', URI) as URIProduct"),  "productmedia.FileName", "productmedia.PublicPath as ProductPhoto")
+            ->join("productmedia", "productmedia.ID_Product", "product.ID")
+            ->join("brand", "brand.ID", "product.ID_Brand")
+            ->leftjoin("discount", "discount.ID_Product", "product.ID")
+            ->leftjoin("productpurchasedetail", "productpurchasedetail.ID_Product", "product.ID")
+            ->where("product.ID_ProductCategory", $idcategorytype)
+            ->groupBy("product.ID")
+            ->orderBy("product.created_at", "DESC")
+            ->orderBy("Discount", "DESC")
+            ->orderBy("productmedia.ID", "ASC");
+
+        $products = $results->paginate(ProductController::CONST_LazyResultsperPage, ['*'], 'page', $data["Page"]);
 
         return json_encode($products);
     }
@@ -239,6 +330,7 @@ class ProductController extends Controller
         return $code;
     }
 
+    const CONST_LazyResultsperPage = 3;
     const CONST_SearchResultsperPage = 10;
     const CONST_LengthRandomCode = 6;
     const CONST_URIAllowedCharacters = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');

@@ -5,4 +5,5 @@ export type ProductBandDetails = {
     Discount: number,
     URIProduct: string,
     ProductPhoto: string,
+    producttags: []
 }
